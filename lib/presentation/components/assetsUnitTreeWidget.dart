@@ -111,15 +111,11 @@ class _AssetsUnitTreeState extends State<AssetsUnitTreeWidget> {
       content: Text(message),
       duration: Duration(seconds: 3),
     );
-  }
-
-  List<AssetsUnit> listClone(List<AssetsUnit> original) {
-    return original.map((item) => AssetsUnit.clone(item)).toList();
   }  
 
   void searchOnPressed() {
     setState(() {
-      widget.assets =  listClone(CacheAssets.originalAssets);
+      widget.assets =  CacheAssets.getClonedList();       
     });
     if (_isCriticoSelected ||
         _isSensorSelected ||
