@@ -99,3 +99,27 @@ class AssetsUnit {
     };
   }
 }
+extension AssetsUnitExtension on AssetsUnit {
+  AssetsUnit clone() {
+    return AssetsUnit(
+      id: id,
+      gatewayId: gatewayId,
+      locationId: locationId,
+      name: name,
+      parentId: parentId,
+      sensorId: sensorId,
+      sensorType: sensorType,
+      status: status,
+      leadingIcon: leadingIcon,
+      isAsset: isAsset,
+      isLocation: isLocation,
+      isParentAsset: isParentAsset,
+    )..children = children.map((child) => child.clone()).toList();
+  }
+}
+
+extension AssetsUnitListClone on List<AssetsUnit> {
+  List<AssetsUnit> nestedClone () {
+    return map((m) => m.clone()).toList();
+  }
+}

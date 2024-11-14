@@ -115,7 +115,7 @@ class _AssetsUnitTreeState extends State<AssetsUnitTreeWidget> {
 
   void searchOnPressed() {
     setState(() {
-      widget.assets =  CacheAssets.getClonedList();       
+      widget.assets =  CacheAssets.originalAssets.nestedClone();       
     });
     if (_isCriticoSelected ||
         _isSensorSelected ||
