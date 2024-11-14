@@ -17,7 +17,7 @@ class FilterAssets {
   final List<AssetsUnit> _filteredAssets = [];
   List<String> _assetsIds = [];
 
- bool _matchFilter(AssetsUnit asset) {
+  bool _matchFilter(AssetsUnit asset) {
     bool result = false;
 
     if (asset.isAsset) {
@@ -96,6 +96,21 @@ class FilterAssets {
     }
   }
 
+  bool _searchById(List<AssetsUnit> assets, String id) {
+    for (var item in assets) {
+      if (item.id == id) {
+        return true;
+      }
+
+      if (item.children.isNotEmpty) {        
+        if (_searchById(item.children, id)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   void _validateChild() {
     if (_assetsIds.isNotEmpty) {
       for (var id in _assetsIds) {
@@ -103,7 +118,10 @@ class FilterAssets {
         if (!(_assetsIds.first == assetUnit.id)) {
           assetUnit.children = [];
         }
-        _filteredAssets.add(assetUnit);
+
+        if (!_searchById(_filteredAssets, id)) {
+          _filteredAssets.add(assetUnit);
+        }
       }
       _assetsIds = [];
     }
