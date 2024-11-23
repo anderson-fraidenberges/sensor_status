@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:sensor_status/models/assetsUnit.dart';
 import 'package:sensor_status/presentation/components/customSearchWidget.dart';
@@ -8,8 +9,9 @@ import 'package:sensor_status/utils/consts.dart';
 
 class AssetsUnitTreeWidget extends StatefulWidget {
   List<AssetsUnit> assets;
+  final String companyId;
 
-  AssetsUnitTreeWidget({super.key, required this.assets});
+  AssetsUnitTreeWidget({super.key, required this.companyId, required this.assets});
 
   @override
   _AssetsUnitTreeState createState() => _AssetsUnitTreeState();
@@ -17,33 +19,35 @@ class AssetsUnitTreeWidget extends StatefulWidget {
 
 class _AssetsUnitTreeState extends State<AssetsUnitTreeWidget> {  
 
-  final Map<AssetsUnit, bool> _expandedNodes = {};
+  final Map<String, bool> _expandedNodes = {};
   bool _isSensorSelected = false;
   bool _isCriticoSelected = false;
   final TextEditingController _searchTextController = TextEditingController();
-  HierarchyBuilder hierarchyBuilder = HierarchyBuilder();
+  late HierarchyBuilder hierarchyBuilder;
 
   void _initializeExpansionState(List<AssetsUnit> assets) {
     for (var asset in assets) {
-      _expandedNodes[asset] = false;
+      _expandedNodes[asset.id] = false;
       if (asset.children.isNotEmpty) {
         _initializeExpansionState(asset.children);
       }
     }
   }
+ 
 
   @override
   void initState() {
     super.initState();
-    CacheAssets.addAssets(widget.assets);
-    _initializeExpansionState(widget.assets);
+     hierarchyBuilder = HierarchyBuilder(widget.companyId);      
+     CacheAssets.addAssets(widget.assets);
+     _initializeExpansionState(widget.assets);     
   }
 
   List<Widget> buildTreeNodeList(List<AssetsUnit> assets, int depth) {
     List<Widget> nodeList = [];
 
     for (var asset in assets) {
-      bool isExpanded = _expandedNodes[asset] ?? false;
+      bool isExpanded = _expandedNodes[asset.id] ?? false;      
       nodeList.add(treeNodeBuilder(context, asset, depth, isExpanded));
 
       if (isExpanded && asset.children.isNotEmpty) {
@@ -69,40 +73,39 @@ class _AssetsUnitTreeState extends State<AssetsUnitTreeWidget> {
         curve: Curves.easeInOut,
         height: 40,
         child: Row(
-          children: <Widget>[
-            SizedBox(width: 20.0 * depth),
-            if (hasChildren)
-              IconButton(
-                icon: Icon(
-                  isExpanded
-                      ? Icons.keyboard_arrow_down_rounded
-                      : Icons.keyboard_arrow_right_rounded,
-                  size: 24,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _expandedNodes[asset] = !isExpanded;
-                  });
-                },
-              )
-            else
-              SizedBox(
-                width:
-                    (asset.children.isEmpty && asset.parentId == null)
-                        ? 15
-                        : 28.0,
+        children: <Widget>[
+          SizedBox(width: 20.0 * depth),
+          if (hasChildren)
+            IconButton(
+              icon: Icon(
+                isExpanded
+                    ? Icons.keyboard_arrow_down_rounded
+                    : Icons.keyboard_arrow_right_rounded,
+                size: 24,
               ),
-            Image.asset("assets/${asset.leadingIcon}.png"),
-            const SizedBox(width: 10),
-            Text(asset.name),
-            const SizedBox(width: 5),
-            asset.sensorType != null
-                ? Image.asset("assets/${asset.sensorType}.png")
-                : const SizedBox(),
-          ],
-        ),
+              onPressed: () {
+                setState(() {
+                  _expandedNodes[asset.id] = !isExpanded;
+                });
+              },
+            )
+          else
+            SizedBox(
+              width:
+                  (asset.children.isEmpty && asset.parentId == null)
+                      ? 15
+                      : 28.0,
+            ),
+          Image.asset("assets/${asset.leadingIcon}.png"),
+          const SizedBox(width: 10),
+          Text(asset.name),
+          const SizedBox(width: 5),
+          asset.sensorType != null
+              ? Image.asset("assets/${asset.sensorType}.png")
+              : const SizedBox(),
+        ],
       ),
-    );
+    ));
   }
 
   SnackBar snackBar(String message) {
@@ -115,7 +118,7 @@ class _AssetsUnitTreeState extends State<AssetsUnitTreeWidget> {
 
   void searchOnPressed() {
     setState(() {
-      widget.assets =  CacheAssets.originalAssets.nestedClone();       
+      widget.assets = CacheAssets.originalAssets.nestedClone();       
     });
     if (_isCriticoSelected ||
         _isSensorSelected ||
@@ -177,7 +180,9 @@ class _AssetsUnitTreeState extends State<AssetsUnitTreeWidget> {
             int index,
           ) {
             return treeNodes[index];
-          }, childCount: treeNodes.length),
+          }, 
+          childCount: treeNodes.length
+          ),
         ),
       ],
     );

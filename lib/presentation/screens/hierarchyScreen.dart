@@ -14,13 +14,12 @@ class HierarchyScreen extends StatefulWidget {
 
 class _HierarchyscreenState extends State<HierarchyScreen> {
   late Future<List<AssetsUnit>> _treeHierarchy;
-  HierarchyBuilder hierarchyBuilder = HierarchyBuilder();
-  
 
   @override
   void initState() {
     super.initState();
     setState(() {  
+      HierarchyBuilder hierarchyBuilder = HierarchyBuilder(widget.companyId);
       _treeHierarchy = hierarchyBuilder.createTreeHierarchyDataAsync(widget.companyId);
     });
   }
@@ -70,7 +69,7 @@ class _HierarchyscreenState extends State<HierarchyScreen> {
              return Container();
           } else {
             final assets = snapshot.data!;
-            return AssetsUnitTreeWidget(assets: assets);
+            return AssetsUnitTreeWidget(assets:assets, companyId: widget.companyId);
           }
         },
       ),

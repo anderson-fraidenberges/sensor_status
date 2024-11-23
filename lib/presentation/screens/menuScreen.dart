@@ -1,3 +1,6 @@
+import 'dart:isolate';
+
+
 import 'package:flutter/material.dart';
 import 'package:sensor_status/models/company.dart';
 import 'package:sensor_status/presentation/components/companyButtonWidget.dart';
@@ -19,7 +22,7 @@ class _UnitScreenState extends State<MenuScreen> {
   void initState() {
     super.initState();
     setState(() {
-      companyList = unitService.fetchUnits();
+      companyList = Isolate.run(unitService.fetchUnits);
     });
   }
 
