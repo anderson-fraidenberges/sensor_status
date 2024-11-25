@@ -20,12 +20,13 @@ class _HierarchyscreenState extends State<HierarchyScreen> {
     super.initState();
     setState(() {  
       HierarchyBuilder hierarchyBuilder = HierarchyBuilder(widget.companyId);
-      _treeHierarchy = hierarchyBuilder.createTreeHierarchyDataAsync(widget.companyId);
+      _treeHierarchy = hierarchyBuilder.createTreeHierarchyDataAsync();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+     
      SnackBar snackBar(String message) {
       return SnackBar(
         backgroundColor: titleColor,

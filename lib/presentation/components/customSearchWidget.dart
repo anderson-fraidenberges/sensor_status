@@ -8,13 +8,15 @@ class CustomSearchWidget extends StatefulWidget {
     required this.onSearchPressed,
     required this.isCriticoSelected,
     required this.isSensorSelected,
-    required this.searchTextController
+    required this.isLoading,
+    required this.searchTextController,
   });
   Function() onCriticalPressed;
   Function() onEnergySensorPressed;
   Function() onSearchPressed;
   bool isSensorSelected = false;
   bool isCriticoSelected = false;
+  bool isLoading = false;
   TextEditingController searchTextController;
 
   @override
@@ -31,19 +33,31 @@ class _CustomSearchWidgetState extends State<CustomSearchWidget> {
         children: [
           TextField(
             controller: widget.searchTextController,
-            onSubmitted: (_) => widget.onSearchPressed(),
+            onSubmitted: (_) => !widget.isLoading ? widget.onSearchPressed : null,
             keyboardType: TextInputType.text,
-            textInputAction: TextInputAction.search, 
-            decoration: InputDecoration(              
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
               filled: true,
               fillColor: Colors.grey[200],
-              prefixIcon: IconButton(icon:Icon(Icons.search), color: Colors.grey, onPressed: widget.onSearchPressed),
+              prefixIcon: IconButton(
+                icon: Icon(Icons.search),
+                color: Colors.grey,
+                onPressed: !widget.isLoading ? widget.onSearchPressed : null,
+              ),
               hintText: 'Buscar Ativo ou Local',
               hintStyle: TextStyle(color: Colors.grey),
-              suffixIcon: IconButton(icon:Icon(Icons.close), color: Colors.grey, onPressed:(){ setState(() {
-                widget.searchTextController.clear();
-                widget.onSearchPressed();
-              }); } ),
+              suffixIcon: IconButton(
+                icon: Icon(Icons.close),
+                color: Colors.grey,
+                onPressed: () {
+                  if (!widget.isLoading) {
+                    setState(() {
+                      widget.searchTextController.clear();
+                      widget.onSearchPressed();
+                    });
+                  }
+                },
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide.none,
@@ -54,12 +68,14 @@ class _CustomSearchWidgetState extends State<CustomSearchWidget> {
           Row(
             children: [
               OutlinedButton.icon(
-                onPressed:(){
-                  setState(() {
-                    widget.onEnergySensorPressed();
-                    widget.onSearchPressed();
-                  });
-                } ,
+                onPressed: () {
+                  if (!widget.isLoading) {
+                    setState(() {
+                      widget.onEnergySensorPressed();
+                      widget.onSearchPressed();
+                    });
+                  }
+                },
                 icon: Icon(
                   Icons.bolt,
                   color: widget.isSensorSelected ? Colors.white : Colors.grey,
@@ -85,11 +101,13 @@ class _CustomSearchWidgetState extends State<CustomSearchWidget> {
               ),
               SizedBox(width: 10.0),
               OutlinedButton.icon(
-                onPressed:(){
-                  setState(() {
-                    widget.onCriticalPressed();
-                    widget.onSearchPressed();
-                  });
+                onPressed: () {
+                  if (!widget.isLoading) {
+                    setState(() {
+                      widget.onCriticalPressed();
+                      widget.onSearchPressed();
+                    });
+                  }
                 },
                 icon: Icon(
                   Icons.error_outline,
@@ -117,10 +135,15 @@ class _CustomSearchWidgetState extends State<CustomSearchWidget> {
               ),
             ],
           ),
+
           Padding(
             padding: const EdgeInsets.only(top: 10.0),
             child: Divider(color: Colors.grey, thickness: 0.5),
           ),
+          if (widget.isLoading) Center(child: Padding(
+            padding: const EdgeInsets.only(top:48.0),
+            child: CircularProgressIndicator(),
+          )),
         ],
       ),
     );

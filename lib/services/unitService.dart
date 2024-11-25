@@ -12,14 +12,19 @@ class UnitService {
       final response = await dio.get(url);
 
       if (response.statusCode == 200) {
-        List<dynamic> data = response.data;
-        return data.map((json) => Company.fromJson(json)).toList();
+        List<dynamic> data = response.data;        
+        final result = await compute(parseJsonFetchUnits, data);
+        return result;
       }
 
       throw Exception('Failed to load units');
     } catch (e) {
       throw Exception(e);
     }
+  }
+
+  List<Company> parseJsonFetchUnits(List<dynamic> responseData) {
+    return responseData.map((json) => Company.fromJson(json)).toList();
   }
 
   Future<List<AssetsUnit>> fetchUnitLocation(String companyId) async {
@@ -31,15 +36,20 @@ class UnitService {
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
+        final result = await compute(parseJsonFetchUnitLocation, data);
 
-        return data
-            .map((json) => AssetsUnit.fromJson(json, isLocation: true))
-            .toList();
+        return result;
       }
       throw Exception('Failed to load unit location');
     } catch (e) {
       throw Exception(e);
     }
+  }
+
+  List<AssetsUnit> parseJsonFetchUnitLocation(List<dynamic> responseData) {
+    return responseData
+        .map((json) => AssetsUnit.fromJson(json, isLocation: true))
+        .toList();
   }
 
   Future<List<AssetsUnit>> fetchAssetsUnit(String companyId) async {

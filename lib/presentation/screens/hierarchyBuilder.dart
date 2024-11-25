@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:flutter/foundation.dart';
 import 'package:sensor_status/models/assetsUnit.dart';
 import 'package:sensor_status/services/unitService.dart';
 
@@ -13,23 +14,23 @@ class HierarchyBuilder {
 
   Future<List<AssetsUnit>> _buildAssetsHierarchyAsync() async {
     List<AssetsUnit> nodes = await _unitService.fetchAssetsUnit(companyId);
-    return _buildHierarchy(nodes);
+    final result = await compute(_buildHierarchy, nodes);
+    return result;
   }
 
   Future<List<AssetsUnit>> _buildLocationHierarchyAsync() async {
     List<AssetsUnit> nodes = await _unitService.fetchUnitLocation(companyId);
-    return _buildHierarchy(nodes);
+    final result = await compute(_buildHierarchy, nodes);
+    return result;
   }
 
   List<AssetsUnit> _buildHierarchy(List<AssetsUnit> nodes) {
-    
     final Map<String, AssetsUnit> nodeMap = {
       for (var node in nodes) node.id: node,
     };
 
-    
     final List<AssetsUnit> hierarchy = [];
-    
+
     for (var node in nodes) {
       if (node.parentId == null) {
         hierarchy.add(node);
@@ -42,10 +43,10 @@ class HierarchyBuilder {
     }
 
     return hierarchy;
-  }
+  } 
 
   List<AssetsUnit> _treeHierarchy() {
-    List<AssetsUnit> treeHierarchy = [];
+    final List<AssetsUnit> treeHierarchy = [];
 
     void attachAssetsChildren(AssetsUnit parent) {
       if (parent.children.isEmpty) {
@@ -54,12 +55,12 @@ class HierarchyBuilder {
       }
 
       for (var child in parent.children) {
-        attachAssetsChildren(child);
+         attachAssetsChildren(child);
       }
     }
 
     for (var location in locations) {
-      attachAssetsChildren(location);
+       attachAssetsChildren(location);
       if (location.children.isNotEmpty) {
         treeHierarchy.add(location);
       }
@@ -74,21 +75,26 @@ class HierarchyBuilder {
     return treeHierarchy;
   }
 
-  Future<List<AssetsUnit>> createTreeHierarchyDataAsync(
-    String companyId,
-  ) async {
-    locations = await Isolate.run(_buildLocationHierarchyAsync);
+  Future<List<AssetsUnit>> createTreeHierarchyDataAsync() async {
+    locations = await _buildLocationHierarchyAsync();
 
-    assets = await Isolate.run(_buildAssetsHierarchyAsync);
+    assets = await _buildAssetsHierarchyAsync();
 
-    return Future.value(_treeHierarchy());
+    final result = await Isolate.run(_treeHierarchy);
+
+    return Future.value(result);
   }
 
-  List<AssetsUnit> createTreeHierarchyFilteredData(List<AssetsUnit> nodes) {
-    locations = _buildHierarchy(nodes.where((w) => w.isLocation).toList());
-    assets = _buildHierarchy(
-      nodes.where((w) => w.isParentAsset || w.isAsset).toList(),
-    );
-    return _treeHierarchy();
+  Future<List<AssetsUnit>> createTreeHierarchyFilteredData(List<AssetsUnit> nodes) async {
+    final locationsNodes = nodes.where((w) => w.isLocation).toList();
+    final assetsNodes = nodes.where((w) => w.isParentAsset || w.isAsset).toList();
+
+    locations = await compute(_buildHierarchy, locationsNodes);
+    
+    assets = await compute(_buildHierarchy, assetsNodes);
+
+    final result = await Isolate.run(_treeHierarchy);
+
+    return Future.value(result);
   }
 }

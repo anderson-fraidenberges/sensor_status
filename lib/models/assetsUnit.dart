@@ -62,6 +62,7 @@ class AssetsUnit {
       if (sensorType != null) {
         return "component";
       }
+
       setParentAsset(sensorType);
       return "parentComponent";
     }
