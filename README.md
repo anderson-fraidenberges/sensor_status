@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/f5f2fd3b-d99d-402a-a387-a927dbcbbbfd
+
 # Sensor Status
 
 monitoring sensor status.
