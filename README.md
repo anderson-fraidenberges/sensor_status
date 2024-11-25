@@ -1,4 +1,7 @@
 
+# Monitoramento de Performance DevTools
+~
+https://github.com/user-attachments/assets/1e6776b9-f3e6-4b63-835f-b58cb5e4d658
 
 # Sensor Status
 
